@@ -1,109 +1,369 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Broiler Tracker</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
-    h1 { text-align: center; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; }
-    input { width: 100%; padding: 8px; margin-bottom: 10px; }
-    button { padding: 10px 20px; background: green; color: white; border: none; cursor: pointer; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
-    .summary { margin-top: 20px; padding: 10px; background: #fff; border: 1px solid #ccc; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broiler Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; color: #333; }
+        h1 { text-align: center; color: #0056b3; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="number"], input[type="date"] {
+            width: calc(100% - 16px); /* Adjusted for padding */
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; /* Include padding in width */
+        }
+        button {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover { background-color: #218838; }
+        button.delete { background-color: #dc3545; }
+        button.delete:hover { background-color: #c82333; }
+        button.edit { background-color: #007bff; }
+        button.edit:hover { background-color: #0056b3; }
+        button.print { background-color: #6c757d; }
+        button.print:hover { background-color: #5a6268; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.05);
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #eee;
+            text-align: center;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #555;
+        }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .summary {
+            margin-top: 25px;
+            padding: 20px;
+            background: #e9f5ff;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #004085;
+        }
+        .summary strong { color: #002752; }
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Broiler Tracker by IKROMIL HADI. SKM</h1>
-  <div class="form-group">
-    <label for="pakanMasuk">Pakan Masuk (kg)</label>
-    <input type="number" id="pakanMasuk">
+    <div class="container">
+        <h1>Broiler Tracker by IKROMIL HADI. SKM</h1>
 
-    <label for="pakanTerpakai">Pakan Terpakai (kg)</label>
-    <input type="number" id="pakanTerpakai">
+        <div class="form-group">
+            <label for="tanggal">Tanggal</label>
+            <input type="date" id="tanggal">
 
-    <label for="bibitMasuk">Bibit Masuk (ekor)</label>
-    <input type="number" id="bibitMasuk">
+            <label for="pakanMasuk">Pakan Masuk (kg)</label>
+            <input type="number" id="pakanMasuk" min="0">
 
-    <label for="kematian">Kematian Hari Ini (ekor)</label>
-    <input type="number" id="kematian">
+            <label for="pakanTerpakai">Pakan Terpakai (kg)</label>
+            <input type="number" id="pakanTerpakai" min="0">
 
-    <label for="beratPanen">Berat Panen (kg) - Opsional</label>
-    <input type="number" id="beratPanen">
+            <label for="bibitMasuk">Bibit Masuk (ekor)</label>
+            <input type="number" id="bibitMasuk" min="0">
 
-    <button onclick="simpanData()">Simpan Data</button>
-  </div>
+            <label for="kematian">Kematian Hari Ini (ekor)</label>
+            <input type="number" id="kematian" min="0">
 
-  <div class="summary" id="ringkasan"></div>
+            <label for="beratPanen">Berat Panen (kg) - Opsional</label>
+            <input type="number" id="beratPanen" min="0">
 
-  <table id="dataTable">
-    <thead>
-      <tr>
-        <th>Tanggal</th>
-        <th>Pakan Masuk</th>
-        <th>Pakan Terpakai</th>
-        <th>Bibit</th>
-        <th>Kematian</th>
-        <th>Ayam Hidup</th>
-        <th>Sisa Pakan</th>
-        <th>Berat Panen</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+            <label for="jumlahPanen">Jumlah Panen (ekor) - Opsional</label>
+            <input type="number" id="jumlahPanen" min="0">
 
-  <script>
-    let totalPakan = 0;
-    let totalTerpakai = 0;
-    let totalBibit = 0;
-    let totalKematian = 0;
-    let totalPanen = 0;
+            <label for="beratTimbanganHarian">Berat Total Timbangan Harian (kg) - Opsional</label>
+            <input type="number" id="beratTimbanganHarian" min="0">
 
-    function simpanData() {
-      const tanggal = new Date().toLocaleDateString('id-ID');
-      const pakanMasuk = parseFloat(document.getElementById('pakanMasuk').value) || 0;
-      const pakanTerpakai = parseFloat(document.getElementById('pakanTerpakai').value) || 0;
-      const bibit = parseInt(document.getElementById('bibitMasuk').value) || 0;
-      const kematian = parseInt(document.getElementById('kematian').value) || 0;
-      const beratPanen = parseFloat(document.getElementById('beratPanen').value) || 0;
+            <label for="jumlahAyamDitimbangHarian">Jumlah Ayam Ditimbang Harian (ekor) - Opsional</label>
+            <input type="number" id="jumlahAyamDitimbangHarian" min="0">
 
-      totalPakan += pakanMasuk;
-      totalTerpakai += pakanTerpakai;
-      totalBibit += bibit;
-      totalKematian += kematian;
-      totalPanen += beratPanen;
+            <button onclick="simpanData()">Simpan Data</button>
+            <button class="print" onclick="cetakPDF()">Cetak PDF</button>
+        </div>
 
-      const sisaPakan = totalPakan - totalTerpakai;
-      const ayamHidup = totalBibit - totalKematian;
+        <div class="summary" id="ringkasan"></div>
 
-      const tbody = document.querySelector('#dataTable tbody');
-      const row = tbody.insertRow();
-      row.innerHTML = `
-        <td>${tanggal}</td>
-        <td>${pakanMasuk}</td>
-        <td>${pakanTerpakai}</td>
-        <td>${bibit}</td>
-        <td>${kematian}</td>
-        <td>${ayamHidup}</td>
-        <td>${sisaPakan}</td>
-        <td>${beratPanen}</td>
-      `;
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Pakan Masuk (kg)</th>
+                    <th>Pakan Terpakai (kg)</th>
+                    <th>Bibit (ekor)</th>
+                    <th>Kematian (ekor)</th>
+                    <th>Ayam Hidup (ekor)</th>
+                    <th>Sisa Pakan (kg)</th>
+                    <th>Berat Panen (kg)</th>
+                    <th>Jumlah Panen (ekor)</th>
+                    <th>FCR</th>
+                    <th>ABW Harian (kg)</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
 
-      document.getElementById('ringkasan').innerHTML = `
-        <strong>Total Bibit:</strong> ${totalBibit} ekor<br>
-        <strong>Total Kematian:</strong> ${totalKematian} ekor<br>
-        <strong>Ayam Hidup Saat Ini:</strong> ${ayamHidup} ekor<br>
-        <strong>Total Pakan Masuk:</strong> ${totalPakan} kg<br>
-        <strong>Total Pakan Terpakai:</strong> ${totalTerpakai} kg<br>
-        <strong>Sisa Pakan:</strong> ${sisaPakan} kg<br>
-        <strong>Total Berat Panen:</strong> ${totalPanen} kg
-      `;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-      document.querySelectorAll('input').forEach(input => input.value = '');
-    }
-  </script>
+    <script>
+        let dataEntries = []; // Array untuk menyimpan semua data harian
+        let editingIndex = -1; // Untuk melacak baris yang sedang diedit
+
+        // Fungsi untuk memuat data dari localStorage saat halaman pertama kali dibuka
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedData = localStorage.getItem('broilerTrackerData');
+            if (storedData) {
+                dataEntries = JSON.parse(storedData);
+            }
+            renderTableAndSummary(); // Render tabel dan ringkasan dengan data yang sudah ada
+        });
+
+        function hitungTotalAyamHidupKumulatif() {
+            let totalBibitKumulatif = 0;
+            let totalKematianKumulatif = 0;
+            for (const entry of dataEntries) {
+                totalBibitKumulatif += entry.bibit || 0;
+                totalKematianKumulatif += entry.kematian || 0;
+            }
+            return totalBibitKumulatif - totalKematianKumulatif;
+        }
+
+        function hitungTotalPakanKumulatif() {
+            let totalPakanKumulatif = 0;
+            for (const entry of dataEntries) {
+                totalPakanKumulatif += entry.pakanMasuk || 0;
+            }
+            return totalPakanKumulatif;
+        }
+
+        function hitungTotalPakanTerpakaiKumulatif() {
+            let totalTerpakaiKumulatif = 0;
+            for (const entry of dataEntries) {
+                totalTerpakaiKumulatif += entry.pakanTerpakai || 0;
+            }
+            return totalTerpakaiKumulatif;
+        }
+
+        function hitungTotalPanenKumulatif() {
+            let totalBeratPanenKumulatif = 0;
+            let totalJumlahPanenKumulatif = 0;
+            for (const entry of dataEntries) {
+                totalBeratPanenKumulatif += entry.beratPanen || 0;
+                totalJumlahPanenKumulatif += entry.jumlahPanen || 0;
+            }
+            return { berat: totalBeratPanenKumulatif, jumlah: totalJumlahPanenKumulatif };
+        }
+
+        function hitungFCR() {
+            const totalPakanTerpakaiKumulatif = hitungTotalPakanTerpakaiKumulatif();
+            const { berat: totalBeratPanenKumulatif } = hitungTotalPanenKumulatif();
+
+            if (totalBeratPanenKumulatif > 0) {
+                return (totalPakanTerpakaiKumulatif / totalBeratPanenKumulatif).toFixed(2);
+            }
+            return 'N/A'; // Not Applicable jika belum ada panen
+        }
+
+        function hitungABW(beratTimbanganHarian, jumlahAyamDitimbangHarian) {
+            if (jumlahAyamDitimbangHarian > 0) {
+                return (beratTimbanganHarian / jumlahAyamDitimbangHarian).toFixed(3);
+            }
+            return 'N/A'; // Not Applicable jika tidak ada data timbangan harian
+        }
+
+        function simpanData() {
+            const tanggalInput = document.getElementById('tanggal').value;
+            if (!tanggalInput) {
+                alert('Tanggal harus diisi!');
+                return;
+            }
+
+            const pakanMasuk = parseFloat(document.getElementById('pakanMasuk').value) || 0;
+            const pakanTerpakai = parseFloat(document.getElementById('pakanTerpakai').value) || 0;
+            const bibit = parseInt(document.getElementById('bibitMasuk').value) || 0;
+            const kematian = parseInt(document.getElementById('kematian').value) || 0;
+            const beratPanen = parseFloat(document.getElementById('beratPanen').value) || 0;
+            const jumlahPanen = parseInt(document.getElementById('jumlahPanen').value) || 0;
+            const beratTimbanganHarian = parseFloat(document.getElementById('beratTimbanganHarian').value) || 0;
+            const jumlahAyamDitimbangHarian = parseInt(document.getElementById('jumlahAyamDitimbangHarian').value) || 0;
+
+            const newEntry = {
+                tanggal: tanggalInput,
+                pakanMasuk: pakanMasuk,
+                pakanTerpakai: pakanTerpakai,
+                bibit: bibit,
+                kematian: kematian,
+                beratPanen: beratPanen,
+                jumlahPanen: jumlahPanen,
+                beratTimbanganHarian: beratTimbanganHarian,
+                jumlahAyamDitimbangHarian: jumlahAyamDitimbangHarian
+            };
+
+            if (editingIndex === -1) {
+                // Tambah data baru
+                dataEntries.push(newEntry);
+            } else {
+                // Edit data yang sudah ada
+                dataEntries[editingIndex] = newEntry;
+                editingIndex = -1; // Reset editing mode
+                document.querySelector('button').textContent = 'Simpan Data'; // Ubah teks tombol kembali
+            }
+
+            saveDataToLocalStorage();
+            renderTableAndSummary();
+            clearForm();
+        }
+
+        function renderTableAndSummary() {
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = ''; // Kosongkan tabel sebelum merender ulang
+
+            let cumulativePakanMasuk = 0;
+            let cumulativePakanTerpakai = 0;
+            let cumulativeBibit = 0;
+            let cumulativeKematian = 0;
+
+            dataEntries.forEach((entry, index) => {
+                cumulativePakanMasuk += entry.pakanMasuk;
+                cumulativePakanTerpakai += entry.pakanTerpakai;
+                cumulativeBibit += entry.bibit;
+                cumulativeKematian += entry.kematian;
+
+                const ayamHidupHariIni = cumulativeBibit - cumulativeKematian;
+                const sisaPakanHariIni = cumulativePakanMasuk - cumulativePakanTerpakai;
+                const fcr = hitungFCR(); // FCR dihitung berdasarkan total kumulatif
+                const abwHarian = hitungABW(entry.beratTimbanganHarian, entry.jumlahAyamDitimbangHarian);
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${entry.tanggal}</td>
+                    <td>${entry.pakanMasuk}</td>
+                    <td>${entry.pakanTerpakai}</td>
+                    <td>${entry.bibit}</td>
+                    <td>${entry.kematian}</td>
+                    <td>${ayamHidupHariIni}</td>
+                    <td>${sisaPakanHariIni.toFixed(2)}</td>
+                    <td>${entry.beratPanen}</td>
+                    <td>${entry.jumlahPanen}</td>
+                    <td>${fcr}</td>
+                    <td>${abwHarian}</td>
+                    <td class="action-buttons">
+                        <button class="edit" onclick="editData(${index})">Edit</button>
+                        <button class="delete" onclick="hapusData(${index})">Hapus</button>
+                    </td>
+                `;
+            });
+
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const ringkasanDiv = document.getElementById('ringkasan');
+            const totalBibit = hitungTotalAyamHidupKumulatif() + hitungTotalKematianKumulatif(); // Total bibit yang dimasukkan
+            const ayamHidupSaatIni = hitungTotalAyamHidupKumulatif();
+            const totalKematian = hitungTotalKematianKumulatif();
+            const totalPakanMasuk = hitungTotalPakanKumulatif();
+            const totalPakanTerpakai = hitungTotalPakanTerpakaiKumulatif();
+            const sisaPakan = totalPakanMasuk - totalPakanTerpakai;
+            const { berat: totalBeratPanen, jumlah: totalJumlahPanen } = hitungTotalPanenKumulatif();
+            const fcrOverall = hitungFCR(); // FCR kumulatif
+
+            ringkasanDiv.innerHTML = `
+                <strong>Total Bibit Masuk:</strong> ${totalBibit} ekor<br>
+                <strong>Total Kematian Kumulatif:</strong> ${totalKematian} ekor<br>
+                <strong>Ayam Hidup Saat Ini:</strong> ${ayamHidupSaatIni} ekor<br>
+                <strong>Total Pakan Masuk Kumulatif:</strong> ${totalPakanMasuk} kg<br>
+                <strong>Total Pakan Terpakai Kumulatif:</strong> ${totalPakanTerpakai} kg<br>
+                <strong>Sisa Pakan Gudang:</strong> ${sisaPakan.toFixed(2)} kg<br>
+                <strong>Total Berat Panen Kumulatif:</strong> ${totalBeratPanen.toFixed(2)} kg (${totalJumlahPanen} ekor)<br>
+                <strong>FCR Keseluruhan:</strong> ${fcrOverall}
+            `;
+        }
+
+        function saveDataToLocalStorage() {
+            localStorage.setItem('broilerTrackerData', JSON.stringify(dataEntries));
+        }
+
+        function clearForm() {
+            document.getElementById('tanggal').value = '';
+            document.getElementById('pakanMasuk').value = '';
+            document.getElementById('pakanTerpakai').value = '';
+            document.getElementById('bibitMasuk').value = '';
+            document.getElementById('kematian').value = '';
+            document.getElementById('beratPanen').value = '';
+            document.getElementById('jumlahPanen').value = '';
+            document.getElementById('beratTimbanganHarian').value = '';
+            document.getElementById('jumlahAyamDitimbangHarian').value = '';
+        }
+
+        function editData(index) {
+            const entry = dataEntries[index];
+            document.getElementById('tanggal').value = entry.tanggal;
+            document.getElementById('pakanMasuk').value = entry.pakanMasuk;
+            document.getElementById('pakanTerpakai').value = entry.pakanTerpakai;
+            document.getElementById('bibitMasuk').value = entry.bibit;
+            document.getElementById('kematian').value = entry.kematian;
+            document.getElementById('beratPanen').value = entry.beratPanen;
+            document.getElementById('jumlahPanen').value = entry.jumlahPanen;
+            document.getElementById('beratTimbanganHarian').value = entry.beratTimbanganHarian;
+            document.getElementById('jumlahAyamDitimbangHarian').value = entry.jumlahAyamDitimbangHarian;
+
+            editingIndex = index; // Set index baris yang sedang diedit
+            document.querySelector('button').textContent = 'Update Data'; // Ubah teks tombol
+        }
+
+        function hapusData(index) {
+            if (confirm('Anda yakin ingin menghapus data ini?')) {
+                dataEntries.splice(index, 1); // Hapus 1 elemen dari array di posisi 'index'
+                saveDataToLocalStorage();
+                renderTableAndSummary();
+            }
+        }
+
+        function cetakPDF() {
+            const element = document.body; // Atau bisa juga targetkan div spesifik, contoh: document.querySelector('.container')
+
+            // Opsi untuk html2pdf
+            const opt = {
+                margin: 10,
+                filename: 'Broiler_Tracker_Laporan.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, logging: true, dpi: 192, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
 </body>
 </html>
