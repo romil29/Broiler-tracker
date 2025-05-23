@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Broiler Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    h1 { text-align: center; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; }
+    input { width: 100%; padding: 8px; margin-bottom: 10px; }
+    button { padding: 10px 20px; background: green; color: white; border: none; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
+    .summary { margin-top: 20px; padding: 10px; background: #fff; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>Broiler Tracker</h1>
+  <div class="form-group">
+    <label for="pakanMasuk">Pakan Masuk (kg)</label>
+    <input type="number" id="pakanMasuk">
+
+    <label for="pakanTerpakai">Pakan Terpakai (kg)</label>
+    <input type="number" id="pakanTerpakai">
+
+    <label for="bibitMasuk">Bibit Masuk (ekor)</label>
+    <input type="number" id="bibitMasuk">
+
+    <label for="kematian">Kematian Hari Ini (ekor)</label>
+    <input type="number" id="kematian">
+
+    <label for="beratPanen">Berat Panen (kg) - Opsional</label>
+    <input type="number" id="beratPanen">
+
+    <button onclick="simpanData()">Simpan Data</button>
+  </div>
+
+  <div class="summary" id="ringkasan"></div>
+
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Tanggal</th>
+        <th>Pakan Masuk</th>
+        <th>Pakan Terpakai</th>
+        <th>Bibit</th>
+        <th>Kematian</th>
+        <th>Ayam Hidup</th>
+        <th>Sisa Pakan</th>
+        <th>Berat Panen</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let totalPakan = 0;
+    let totalTerpakai = 0;
+    let totalBibit = 0;
+    let totalKematian = 0;
+    let totalPanen = 0;
+
+    function simpanData() {
+      const tanggal = new Date().toLocaleDateString('id-ID');
+      const pakanMasuk = parseFloat(document.getElementById('pakanMasuk').value) || 0;
+      const pakanTerpakai = parseFloat(document.getElementById('pakanTerpakai').value) || 0;
+      const bibit = parseInt(document.getElementById('bibitMasuk').value) || 0;
+      const kematian = parseInt(document.getElementById('kematian').value) || 0;
+      const beratPanen = parseFloat(document.getElementById('beratPanen').value) || 0;
+
+      totalPakan += pakanMasuk;
+      totalTerpakai += pakanTerpakai;
+      totalBibit += bibit;
+      totalKematian += kematian;
+      totalPanen += beratPanen;
+
+      const sisaPakan = totalPakan - totalTerpakai;
+      const ayamHidup = totalBibit - totalKematian;
+
+      const tbody = document.querySelector('#dataTable tbody');
+      const row = tbody.insertRow();
+      row.innerHTML = `
+        <td>${tanggal}</td>
+        <td>${pakanMasuk}</td>
+        <td>${pakanTerpakai}</td>
+        <td>${bibit}</td>
+        <td>${kematian}</td>
+        <td>${ayamHidup}</td>
+        <td>${sisaPakan}</td>
+        <td>${beratPanen}</td>
+      `;
+
+      document.getElementById('ringkasan').innerHTML = `
+        <strong>Total Bibit:</strong> ${totalBibit} ekor<br>
+        <strong>Total Kematian:</strong> ${totalKematian} ekor<br>
+        <strong>Ayam Hidup Saat Ini:</strong> ${ayamHidup} ekor<br>
+        <strong>Total Pakan Masuk:</strong> ${totalPakan} kg<br>
+        <strong>Total Pakan Terpakai:</strong> ${totalTerpakai} kg<br>
+        <strong>Sisa Pakan:</strong> ${sisaPakan} kg<br>
+        <strong>Total Berat Panen:</strong> ${totalPanen} kg
+      `;
+
+      document.querySelectorAll('input').forEach(input => input.value = '');
+    }
+  </script>
+</body>
+</html>
