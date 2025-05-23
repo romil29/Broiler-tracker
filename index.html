@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Broiler Tracker by IKROMIL HADI. SKM</title>
+    <title>Broiler Tracker</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; color: #333; }
         h1 { text-align: center; color: #0056b3; }
         .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="number"], input[type="date"] {
-            width: calc(100% - 16px); /* Adjusted for padding */
+        input[type="number"], input[type="date"], input[type="text"] {
+            width: calc(100% - 16px);
             padding: 10px;
             margin-bottom: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box; /* Include padding in width */
+            box-sizing: border-box;
         }
         button {
             padding: 10px 20px;
@@ -71,41 +71,55 @@
             justify-content: center;
             gap: 5px;
         }
+        .initial-data-form {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Broiler Tracker by IKROMIL HADI. SKM</h1>
 
+        <div class="initial-data-form">
+            <h2>Data Awal Peternakan</h2>
+            <div class="form-group">
+                <label for="namaPeternak">Nama Peternak:</label>
+                <input type="text" id="namaPeternak">
+
+                <label for="alamat">Alamat:</label>
+                <input type="text" id="alamat">
+
+                <label for="bermitraDengan">Bermitra dengan:</label>
+                <input type="text" id="bermitraDengan">
+
+                <label for="populasiAwal">Populasi Awal (ekor):</label>
+                <input type="number" id="populasiAwal" min="0">
+                <button onclick="simpanDataAwal()">Simpan Data Awal</button>
+            </div>
+        </div>
+
         <div class="form-group">
-            <label for="tanggal">Tanggal</label>
+            <h2>Input Data Harian</h2>
+            <label for="tanggal">Tanggal:</label>
             <input type="date" id="tanggal">
 
-            <label for="pakanMasuk">Pakan Masuk (kg)</label>
+            <label for="abw">ABW (gram):</label>
+            <input type="number" id="abw" min="0">
+
+            <label for="pakanMasuk">Pakan Masuk (karung):</label>
             <input type="number" id="pakanMasuk" min="0">
 
-            <label for="pakanTerpakai">Pakan Terpakai (kg)</label>
+            <label for="pakanTerpakai">Pakan Terpakai (karung):</label>
             <input type="number" id="pakanTerpakai" min="0">
 
-            <label for="bibitMasuk">Bibit Masuk (ekor)</label>
-            <input type="number" id="bibitMasuk" min="0">
+            <label for="ayamMati">Ayam Mati (ekor):</label>
+            <input type="number" id="ayamMati" min="0">
 
-            <label for="kematian">Kematian Hari Ini (ekor)</label>
-            <input type="number" id="kematian" min="0">
-
-            <label for="beratPanen">Berat Panen (kg) - Opsional</label>
-            <input type="number" id="beratPanen" min="0">
-
-            <label for="jumlahPanen">Jumlah Panen (ekor) - Opsional</label>
-            <input type="number" id="jumlahPanen" min="0">
-
-            <label for="beratTimbanganHarian">Berat Total Timbangan Harian (kg) - Opsional</label>
-            <input type="number" id="beratTimbanganHarian" min="0">
-
-            <label for="jumlahAyamDitimbangHarian">Jumlah Ayam Ditimbang Harian (ekor) - Opsional</label>
-            <input type="number" id="jumlahAyamDitimbangHarian" min="0">
-
-            <button onclick="simpanData()">Simpan Data</button>
+            <button onclick="simpanDataHarian()">Simpan Data Harian</button>
             <button class="print" onclick="cetakPDF()">Cetak PDF</button>
         </div>
 
@@ -115,16 +129,16 @@
             <thead>
                 <tr>
                     <th>Tanggal</th>
-                    <th>Pakan Masuk (kg)</th>
-                    <th>Pakan Terpakai (kg)</th>
-                    <th>Bibit (ekor)</th>
-                    <th>Kematian (ekor)</th>
-                    <th>Ayam Hidup (ekor)</th>
-                    <th>Sisa Pakan (kg)</th>
-                    <th>Berat Panen (kg)</th>
-                    <th>Jumlah Panen (ekor)</th>
+                    <th>ABW (g)</th>
+                    <th>Pakan Masuk (Karung)</th>
+                    <th>Pakan Masuk (Kg)</th>
+                    <th>Pakan Terpakai (Karung)</th>
+                    <th>Pakan Terpakai (Kg)</th>
+                    <th>Sisa Pakan (Karung)</th>
+                    <th>Sisa Pakan (Kg)</th>
+                    <th>Ayam Mati (ekor)</th>
+                    <th>Sisa Ayam (ekor)</th>
                     <th>FCR</th>
-                    <th>ABW Harian (kg)</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -136,147 +150,143 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
-        let dataEntries = []; // Array untuk menyimpan semua data harian
+        const PAKAN_PER_KARUNG_KG = 50; // 1 karung = 50 kg
+
+        let initialData = {
+            namaPeternak: '',
+            alamat: '',
+            bermitraDengan: '',
+            populasiAwal: 0
+        };
+
+        let dailyEntries = []; // Array untuk menyimpan semua data harian
         let editingIndex = -1; // Untuk melacak baris yang sedang diedit
 
         // Fungsi untuk memuat data dari localStorage saat halaman pertama kali dibuka
         document.addEventListener('DOMContentLoaded', () => {
-            const storedData = localStorage.getItem('broilerTrackerData');
-            if (storedData) {
-                dataEntries = JSON.parse(storedData);
-            }
-            renderTableAndSummary(); // Render tabel dan ringkasan dengan data yang sudah ada
+            loadDataFromLocalStorage();
+            renderInitialDataForm();
+            renderTableAndSummary();
         });
 
-        function hitungTotalAyamHidupKumulatif() {
-            let totalBibitKumulatif = 0;
-            let totalKematianKumulatif = 0;
-            for (const entry of dataEntries) {
-                totalBibitKumulatif += entry.bibit || 0;
-                totalKematianKumulatif += entry.kematian || 0;
+        function loadDataFromLocalStorage() {
+            const storedInitialData = localStorage.getItem('broilerTrackerInitialData');
+            if (storedInitialData) {
+                initialData = JSON.parse(storedInitialData);
             }
-            return totalBibitKumulatif - totalKematianKumulatif;
+
+            const storedDailyData = localStorage.getItem('broilerTrackerDailyData');
+            if (storedDailyData) {
+                dailyEntries = JSON.parse(storedDailyData);
+            }
         }
 
-        function hitungTotalPakanKumulatif() {
-            let totalPakanKumulatif = 0;
-            for (const entry of dataEntries) {
-                totalPakanKumulatif += entry.pakanMasuk || 0;
-            }
-            return totalPakanKumulatif;
+        function saveDataToLocalStorage() {
+            localStorage.setItem('broilerTrackerInitialData', JSON.stringify(initialData));
+            localStorage.setItem('broilerTrackerDailyData', JSON.stringify(dailyEntries));
         }
 
-        function hitungTotalPakanTerpakaiKumulatif() {
-            let totalTerpakaiKumulatif = 0;
-            for (const entry of dataEntries) {
-                totalTerpakaiKumulatif += entry.pakanTerpakai || 0;
-            }
-            return totalTerpakaiKumulatif;
+        function renderInitialDataForm() {
+            document.getElementById('namaPeternak').value = initialData.namaPeternak;
+            document.getElementById('alamat').value = initialData.alamat;
+            document.getElementById('bermitraDengan').value = initialData.bermitraDengan;
+            document.getElementById('populasiAwal').value = initialData.populasiAwal;
         }
 
-        function hitungTotalPanenKumulatif() {
-            let totalBeratPanenKumulatif = 0;
-            let totalJumlahPanenKumulatif = 0;
-            for (const entry of dataEntries) {
-                totalBeratPanenKumulatif += entry.beratPanen || 0;
-                totalJumlahPanenKumulatif += entry.jumlahPanen || 0;
-            }
-            return { berat: totalBeratPanenKumulatif, jumlah: totalJumlahPanenKumulatif };
+        function simpanDataAwal() {
+            initialData.namaPeternak = document.getElementById('namaPeternak').value;
+            initialData.alamat = document.getElementById('alamat').value;
+            initialData.bermitraDengan = document.getElementById('bermitraDengan').value;
+            initialData.populasiAwal = parseInt(document.getElementById('populasiAwal').value) || 0;
+            saveDataToLocalStorage();
+            updateSummary(); // Perbarui ringkasan setelah data awal disimpan
+            alert('Data Awal Peternakan berhasil disimpan!');
         }
 
-        function hitungFCR() {
-            const totalPakanTerpakaiKumulatif = hitungTotalPakanTerpakaiKumulatif();
-            const { berat: totalBeratPanenKumulatif } = hitungTotalPanenKumulatif();
-
-            if (totalBeratPanenKumulatif > 0) {
-                return (totalPakanTerpakaiKumulatif / totalBeratPanenKumulatif).toFixed(2);
-            }
-            return 'N/A'; // Not Applicable jika belum ada panen
-        }
-
-        function hitungABW(beratTimbanganHarian, jumlahAyamDitimbangHarian) {
-            if (jumlahAyamDitimbangHarian > 0) {
-                return (beratTimbanganHarian / jumlahAyamDitimbangHarian).toFixed(3);
-            }
-            return 'N/A'; // Not Applicable jika tidak ada data timbangan harian
-        }
-
-        function simpanData() {
+        function simpanDataHarian() {
             const tanggalInput = document.getElementById('tanggal').value;
             if (!tanggalInput) {
                 alert('Tanggal harus diisi!');
                 return;
             }
 
-            const pakanMasuk = parseFloat(document.getElementById('pakanMasuk').value) || 0;
-            const pakanTerpakai = parseFloat(document.getElementById('pakanTerpakai').value) || 0;
-            const bibit = parseInt(document.getElementById('bibitMasuk').value) || 0;
-            const kematian = parseInt(document.getElementById('kematian').value) || 0;
-            const beratPanen = parseFloat(document.getElementById('beratPanen').value) || 0;
-            const jumlahPanen = parseInt(document.getElementById('jumlahPanen').value) || 0;
-            const beratTimbanganHarian = parseFloat(document.getElementById('beratTimbanganHarian').value) || 0;
-            const jumlahAyamDitimbangHarian = parseInt(document.getElementById('jumlahAyamDitimbangHarian').value) || 0;
+            const abw = parseFloat(document.getElementById('abw').value) || 0;
+            const pakanMasukKarung = parseFloat(document.getElementById('pakanMasuk').value) || 0;
+            const pakanTerpakaiKarung = parseFloat(document.getElementById('pakanTerpakai').value) || 0;
+            const ayamMati = parseInt(document.getElementById('ayamMati').value) || 0;
 
             const newEntry = {
                 tanggal: tanggalInput,
-                pakanMasuk: pakanMasuk,
-                pakanTerpakai: pakanTerpakai,
-                bibit: bibit,
-                kematian: kematian,
-                beratPanen: beratPanen,
-                jumlahPanen: jumlahPanen,
-                beratTimbanganHarian: beratTimbanganHarian,
-                jumlahAyamDitimbangHarian: jumlahAyamDitimbangHarian
+                abw: abw,
+                pakanMasukKarung: pakanMasukKarung,
+                pakanTerpakaiKarung: pakanTerpakaiKarung,
+                ayamMati: ayamMati
             };
 
             if (editingIndex === -1) {
-                // Tambah data baru
-                dataEntries.push(newEntry);
+                dailyEntries.push(newEntry);
             } else {
-                // Edit data yang sudah ada
-                dataEntries[editingIndex] = newEntry;
+                dailyEntries[editingIndex] = newEntry;
                 editingIndex = -1; // Reset editing mode
-                document.querySelector('button').textContent = 'Simpan Data'; // Ubah teks tombol kembali
+                document.querySelector('.form-group button').textContent = 'Simpan Data Harian'; // Ubah teks tombol
             }
 
             saveDataToLocalStorage();
             renderTableAndSummary();
-            clearForm();
+            clearDailyForm();
         }
 
         function renderTableAndSummary() {
             const tbody = document.querySelector('#dataTable tbody');
             tbody.innerHTML = ''; // Kosongkan tabel sebelum merender ulang
 
-            let cumulativePakanMasuk = 0;
-            let cumulativePakanTerpakai = 0;
-            let cumulativeBibit = 0;
-            let cumulativeKematian = 0;
+            let cumulativePakanMasukKarung = 0;
+            let cumulativePakanTerpakaiKarung = 0;
+            let cumulativeAyamMati = 0;
+            let lastABW = 0;
 
-            dataEntries.forEach((entry, index) => {
-                cumulativePakanMasuk += entry.pakanMasuk;
-                cumulativePakanTerpakai += entry.pakanTerpakai;
-                cumulativeBibit += entry.bibit;
-                cumulativeKematian += entry.kematian;
+            dailyEntries.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)); // Urutkan berdasarkan tanggal
 
-                const ayamHidupHariIni = cumulativeBibit - cumulativeKematian;
-                const sisaPakanHariIni = cumulativePakanMasuk - cumulativePakanTerpakai;
-                const fcr = hitungFCR(); // FCR dihitung berdasarkan total kumulatif
-                const abwHarian = hitungABW(entry.beratTimbanganHarian, entry.jumlahAyamDitimbangHarian);
+            dailyEntries.forEach((entry, index) => {
+                cumulativePakanMasukKarung += entry.pakanMasukKarung;
+                cumulativePakanTerpakaiKarung += entry.pakanTerpakaiKarung;
+                cumulativeAyamMati += entry.ayamMati;
+                if (entry.abw > 0) { // Ambil ABW terakhir yang valid
+                    lastABW = entry.abw;
+                }
+
+                const pakanMasukKg = entry.pakanMasukKarung * PAKAN_PER_KARUNG_KG;
+                const pakanTerpakaiKg = entry.pakanTerpakaiKarung * PAKAN_PER_KARUNG_KG;
+
+                const sisaPakanKarungHariIni = cumulativePakanMasukKarung - cumulativePakanTerpakaiKarung;
+                const sisaPakanKgHariIni = sisaPakanKarungHariIni * PAKAN_PER_KARUNG_KG;
+
+                const sisaAyamHariIni = initialData.populasiAwal - cumulativeAyamMati;
+
+                // FCR Calculation: Total Feed Consumed (Kg) / (Estimated Live Weight (Kg))
+                // Estimated Live Weight = Sisa Ayam * ABW terakhir (dalam Kg)
+                const totalPakanTerpakaiKumulatifKg = cumulativePakanTerpakaiKarung * PAKAN_PER_KARUNG_KG;
+                const estimatedLiveWeightKg = (sisaAyamHariIni * lastABW) / 1000; // ABW from gram to Kg
+
+                let fcr = 'N/A';
+                if (estimatedLiveWeightKg > 0) {
+                    fcr = (totalPakanTerpakaiKumulatifKg / estimatedLiveWeightKg).toFixed(2);
+                }
+
 
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${entry.tanggal}</td>
-                    <td>${entry.pakanMasuk}</td>
-                    <td>${entry.pakanTerpakai}</td>
-                    <td>${entry.bibit}</td>
-                    <td>${entry.kematian}</td>
-                    <td>${ayamHidupHariIni}</td>
-                    <td>${sisaPakanHariIni.toFixed(2)}</td>
-                    <td>${entry.beratPanen}</td>
-                    <td>${entry.jumlahPanen}</td>
+                    <td>${entry.abw}</td>
+                    <td>${entry.pakanMasukKarung}</td>
+                    <td>${pakanMasukKg}</td>
+                    <td>${entry.pakanTerpakaiKarung}</td>
+                    <td>${pakanTerpakaiKg}</td>
+                    <td>${sisaPakanKarungHariIni.toFixed(2)}</td>
+                    <td>${sisaPakanKgHariIni.toFixed(2)}</td>
+                    <td>${entry.ayamMati}</td>
+                    <td>${sisaAyamHariIni}</td>
                     <td>${fcr}</td>
-                    <td>${abwHarian}</td>
                     <td class="action-buttons">
                         <button class="edit" onclick="editData(${index})">Edit</button>
                         <button class="delete" onclick="hapusData(${index})">Hapus</button>
@@ -289,69 +299,84 @@
 
         function updateSummary() {
             const ringkasanDiv = document.getElementById('ringkasan');
-            const totalBibit = hitungTotalAyamHidupKumulatif() + hitungTotalKematianKumulatif(); // Total bibit yang dimasukkan
-            const ayamHidupSaatIni = hitungTotalAyamHidupKumulatif();
-            const totalKematian = hitungTotalKematianKumulatif();
-            const totalPakanMasuk = hitungTotalPakanKumulatif();
-            const totalPakanTerpakai = hitungTotalPakanTerpakaiKumulatif();
-            const sisaPakan = totalPakanMasuk - totalPakanTerpakai;
-            const { berat: totalBeratPanen, jumlah: totalJumlahPanen } = hitungTotalPanenKumulatif();
-            const fcrOverall = hitungFCR(); // FCR kumulatif
+
+            let cumulativePakanMasukKarung = 0;
+            let cumulativePakanTerpakaiKarung = 0;
+            let cumulativeAyamMati = 0;
+            let lastABW = 0;
+
+            dailyEntries.forEach(entry => {
+                cumulativePakanMasukKarung += entry.pakanMasukKarung;
+                cumulativePakanTerpakaiKarung += entry.pakanTerpakaiKarung;
+                cumulativeAyamMati += entry.ayamMati;
+                if (entry.abw > 0) {
+                    lastABW = entry.abw;
+                }
+            });
+
+            const totalSisaAyam = initialData.populasiAwal - cumulativeAyamMati;
+            const sisaPakanGudangKarung = cumulativePakanMasukKarung - cumulativePakanTerpakaiKarung;
+            const sisaPakanGudangKg = sisaPakanGudangKarung * PAKAN_PER_KARUNG_KG;
+
+            const totalPakanTerpakaiKumulatifKg = cumulativePakanTerpakaiKarung * PAKAN_PER_KARUNG_KG;
+            const estimatedLiveWeightKgOverall = (totalSisaAyam * lastABW) / 1000; // Convert ABW from gram to Kg
+
+            let fcrOverall = 'N/A';
+            if (estimatedLiveWeightKgOverall > 0) {
+                fcrOverall = (totalPakanTerpakaiKumulatifKg / estimatedLiveWeightKgOverall).toFixed(2);
+            } else if (dailyEntries.length > 0 && initialData.populasiAwal > 0) {
+                 // Fallback FCR for cases with no ABW recorded yet but some activity
+                 // This might be less accurate, but provides a value.
+                 fcrOverall = (totalPakanTerpakaiKumulatifKg / (initialData.populasiAwal * (lastABW || 1) / 1000)).toFixed(2);
+            }
 
             ringkasanDiv.innerHTML = `
-                <strong>Total Bibit Masuk:</strong> ${totalBibit} ekor<br>
-                <strong>Total Kematian Kumulatif:</strong> ${totalKematian} ekor<br>
-                <strong>Ayam Hidup Saat Ini:</strong> ${ayamHidupSaatIni} ekor<br>
-                <strong>Total Pakan Masuk Kumulatif:</strong> ${totalPakanMasuk} kg<br>
-                <strong>Total Pakan Terpakai Kumulatif:</strong> ${totalPakanTerpakai} kg<br>
-                <strong>Sisa Pakan Gudang:</strong> ${sisaPakan.toFixed(2)} kg<br>
-                <strong>Total Berat Panen Kumulatif:</strong> ${totalBeratPanen.toFixed(2)} kg (${totalJumlahPanen} ekor)<br>
+                <h2>Ringkasan Keseluruhan</h2>
+                <strong>Nama Peternak:</strong> ${initialData.namaPeternak || 'Belum diisi'}<br>
+                <strong>Alamat:</strong> ${initialData.alamat || 'Belum diisi'}<br>
+                <strong>Bermitra dengan:</strong> ${initialData.bermitraDengan || 'Belum diisi'}<br>
+                <strong>Populasi Awal:</strong> ${initialData.populasiAwal} ekor<br>
+                ---<br>
+                <strong>Total Pakan Masuk Kumulatif:</strong> ${cumulativePakanMasukKarung.toFixed(2)} karung (${(cumulativePakanMasukKarung * PAKAN_PER_KARUNG_KG).toFixed(2)} kg)<br>
+                <strong>Total Pakan Terpakai Kumulatif:</strong> ${cumulativePakanTerpakaiKarung.toFixed(2)} karung (${(cumulativePakanTerpakaiKarung * PAKAN_PER_KARUNG_KG).toFixed(2)} kg)<br>
+                <strong>Sisa Pakan Gudang:</strong> ${sisaPakanGudangKarung.toFixed(2)} karung (${sisaPakanGudangKg.toFixed(2)} kg)<br>
+                <strong>Total Kematian Kumulatif:</strong> ${cumulativeAyamMati} ekor<br>
+                <strong>Sisa Ayam Hidup Saat Ini:</strong> ${totalSisaAyam} ekor<br>
+                <strong>ABW Terakhir Tercatat:</strong> ${lastABW} gram<br>
                 <strong>FCR Keseluruhan:</strong> ${fcrOverall}
             `;
         }
 
-        function saveDataToLocalStorage() {
-            localStorage.setItem('broilerTrackerData', JSON.stringify(dataEntries));
-        }
-
-        function clearForm() {
+        function clearDailyForm() {
             document.getElementById('tanggal').value = '';
+            document.getElementById('abw').value = '';
             document.getElementById('pakanMasuk').value = '';
             document.getElementById('pakanTerpakai').value = '';
-            document.getElementById('bibitMasuk').value = '';
-            document.getElementById('kematian').value = '';
-            document.getElementById('beratPanen').value = '';
-            document.getElementById('jumlahPanen').value = '';
-            document.getElementById('beratTimbanganHarian').value = '';
-            document.getElementById('jumlahAyamDitimbangHarian').value = '';
+            document.getElementById('ayamMati').value = '';
         }
 
         function editData(index) {
-            const entry = dataEntries[index];
+            const entry = dailyEntries[index];
             document.getElementById('tanggal').value = entry.tanggal;
-            document.getElementById('pakanMasuk').value = entry.pakanMasuk;
-            document.getElementById('pakanTerpakai').value = entry.pakanTerpakai;
-            document.getElementById('bibitMasuk').value = entry.bibit;
-            document.getElementById('kematian').value = entry.kematian;
-            document.getElementById('beratPanen').value = entry.beratPanen;
-            document.getElementById('jumlahPanen').value = entry.jumlahPanen;
-            document.getElementById('beratTimbanganHarian').value = entry.beratTimbanganHarian;
-            document.getElementById('jumlahAyamDitimbangHarian').value = entry.jumlahAyamDitimbangHarian;
+            document.getElementById('abw').value = entry.abw;
+            document.getElementById('pakanMasuk').value = entry.pakanMasukKarung;
+            document.getElementById('pakanTerpakai').value = entry.pakanTerpakaiKarung;
+            document.getElementById('ayamMati').value = entry.ayamMati;
 
             editingIndex = index; // Set index baris yang sedang diedit
-            document.querySelector('button').textContent = 'Update Data'; // Ubah teks tombol
+            document.querySelector('.form-group button').textContent = 'Update Data Harian'; // Ubah teks tombol
         }
 
         function hapusData(index) {
             if (confirm('Anda yakin ingin menghapus data ini?')) {
-                dataEntries.splice(index, 1); // Hapus 1 elemen dari array di posisi 'index'
+                dailyEntries.splice(index, 1); // Hapus 1 elemen dari array di posisi 'index'
                 saveDataToLocalStorage();
                 renderTableAndSummary();
             }
         }
 
         function cetakPDF() {
-            const element = document.body; // Atau bisa juga targetkan div spesifik, contoh: document.querySelector('.container')
+            const element = document.querySelector('.container'); // Targetkan div .container untuk dicetak
 
             // Opsi untuk html2pdf
             const opt = {
@@ -359,10 +384,17 @@
                 filename: 'Broiler_Tracker_Laporan.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, logging: true, dpi: 192, letterRendering: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } // Ubah orientasi menjadi landscape
             };
 
-            html2pdf().set(opt).from(element).save();
+            // Tambahkan judul ke elemen yang akan dicetak untuk laporan PDF yang lebih baik
+            const titleElement = document.createElement('h2');
+            titleElement.textContent = 'Laporan Broiler Tracker';
+            element.prepend(titleElement); // Tambahkan judul di awal elemen kontainer
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.removeChild(titleElement); // Hapus judul setelah PDF dibuat agar tidak mengganggu tampilan web
+            });
         }
     </script>
 </body>
